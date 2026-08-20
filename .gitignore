@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+venv/
+.env
+
+# Scripts auxiliares
+debug_page.js
+download_icon.py
+resize_icon.py
+standardize_floors.py
+standardize_floors2.py
+crop_floors.py
+crop_floors2.py
+check_floors.py
+
+# Ícones originais
+loki_icon.png
+loki_icon_128.png
+
+# Frontend antigo (se não for usar)
+# frontend/
+
+# Backend SQLite
+backend/*.db
+backend/app.db
+
+# IDE
+.vscode/
+.idea/

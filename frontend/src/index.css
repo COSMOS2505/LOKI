@@ -1,0 +1,84 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+
+@layer base {
+  body {
+    background-color: #1a1a2e;
+    color: #e2e8f0;
+    font-family: 'Courier New', Courier, monospace;
+    margin: 0;
+  }
+}
+
+/* Paleta pixel art */
+.pixel-border {
+  border: 3px solid #334155;
+  box-shadow: 4px 4px 0 #0f172a;
+}
+
+.pixel-btn {
+  border: 2px solid #475569;
+  background: #1e293b;
+  color: #cbd5e1;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.1s;
+}
+
+.pixel-btn:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+.pixel-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: -1px -1px 0 #1e293b;
+}
+
+/* Sprite estilo 8-bit */
+.sprite-agent {
+  width: 64px;
+  height: 80px;
+  image-rendering: pixelated;
+  transition: transform 0.15s;
+}
+
+.sprite-agent:hover {
+  transform: scale(1.05);
+}
+
+/* Animação de transição do prédio */
+.room-enter {
+  animation: roomEnter 0.4s ease-out;
+}
+
+@keyframes roomEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Scrollbar pixel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border: 2px solid #0f172a;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
