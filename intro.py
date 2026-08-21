@@ -224,7 +224,7 @@ def draw_chatbox(screen, messages, input_text, input_active, chat_scroll_y):
     
     return send_btn, close_btn
 
-def draw_room(screen, andar_idx, floors, chat_messages, chat_input, chat_active, chat_scroll):
+def draw_room(screen, andar_idx, floors, chat_messages, chat_input, chat_active, chat_scroll, chat_open):
     s = pygame.Surface((SCREEN_W, SCREEN_H), pygame.SRCALPHA)
     s.fill((20, 20, 40, 200))
     screen.blit(s, (0, 0))
@@ -247,59 +247,69 @@ def draw_room(screen, andar_idx, floors, chat_messages, chat_input, chat_active,
     pygame.draw.rect(screen, (255, 100, 100), back_btn, 2)
     screen.blit(FONT_BTN.render("< Voltar", True, WHITE), (back_btn.x + 20, back_btn.y + 8))
     
-    # Area do agente
-    agent_x = rx + rw // 2 - 30
-    agent_y = ry + rh // 2
-    for dx in range(-3, 4):
-        for dy in range(-5, 0):
-            pygame.draw.rect(screen, (101, 55, 0), (agent_x + dx*3, agent_y + dy*3, 3, 3))
-    for dx in range(-2, 3):
-        for dy in range(-3, 0):
-            pygame.draw.rect(screen, SKIN, (agent_x + dx*3, agent_y + dy*3, 3, 3))
-    pygame.draw.rect(screen, BLUE_EYE, (agent_x - 3, agent_y - 6, 3, 3))
-    pygame.draw.rect(screen, BLUE_EYE, (agent_x + 3, agent_y - 6, 3, 3))
-    for dx in range(-3, 4):
-        for dy in range(0, 6):
-            pygame.draw.rect(screen, (85, 107, 47), (agent_x + dx*3, agent_y + dy*3, 3, 3))
+    # Agente no centro da sala (clique para abrir chat)
+    agent_x = rx + rw // 2
+    agent_y = ry + rh // 2 + 20
     
-    screen.blit(FONT_SM.render("Agente", True, (200, 200, 255)), (agent_x - 30, agent_y + 25))
+    # Desenhar agente maior
+    for dx in range(-5, 6):
+        for dy in range(-7, -1):
+            if abs(dx) <= 4 and dy >= -6:
+                pygame.draw.rect(screen, (101, 55, 0), (agent_x + dx*4, agent_y + dy*4, 4, 4))
+    for dx in range(-4, 5):
+        for dy in range(-4, 1):
+            if abs(dx) <= 3:
+                pygame.draw.rect(screen, SKIN, (agent_x + dx*4, agent_y + dy*4, 4, 4))
+    pygame.draw.rect(screen, BLUE_EYE, (agent_x - 4, agent_y - 12, 4, 4))
+    pygame.draw.rect(screen, BLUE_EYE, (agent_x + 4, agent_y - 12, 4, 4))
+    for dx in range(-5, 6):
+        for dy in range(0, 8):
+            pygame.draw.rect(screen, (85, 107, 47), (agent_x + dx*4, agent_y + dy*4, 4, 4))
+    for dx in range(-5, 6):
+        pygame.draw.rect(screen, (60, 40, 20), (agent_x + dx*4, agent_y + 32, 4, 4))
     
-    # Chat
-    cx = rx + 20; cy = ry + 60; cw = rw - 40; ch = rh - 150
+    # Label "Clique em mim!"
+    screen.blit(FONT_SM.render("Clique em mim!", True, (200, 200, 255)), (agent_x - 45, agent_y + 45))
     
-    y_off = cy + chat_scroll
-    for msg in chat_messages:
-        color = WHITE if msg["role"] == "user" else GOLD
-        prefix = "Voce: " if msg["role"] == "user" else "Agente: "
-        text = prefix + msg["content"]
-        words = text.split()
-        lines = []
-        current_line = ""
-        for word in words:
-            test = current_line + word + " "
-            if FONT_CHAT.size(test)[0] > cw - 40:
-                lines.append(current_line)
-                current_line = word + " "
-            else:
-                current_line = test
-        lines.append(current_line)
+    # Se chat aberto, desenhar chat
+    if chat_open:
+        cx = rx + 20; cy = ry + 60; cw = rw - 40; ch = rh - 180
         
-        for line in lines:
-            if y_off > cy - 20 and y_off < cy + ch - 30:
-                screen.blit(FONT_CHAT.render(line, True, color), (cx + 10, y_off))
-            y_off += 22
+        y_off = cy + chat_scroll
+        for msg in chat_messages:
+            color = WHITE if msg["role"] == "user" else GOLD
+            prefix = "Voce: " if msg["role"] == "user" else "Agente: "
+            text = prefix + msg["content"]
+            words = text.split()
+            lines = []
+            current_line = ""
+            for word in words:
+                test = current_line + word + " "
+                if FONT_CHAT.size(test)[0] > cw - 40:
+                    lines.append(current_line)
+                    current_line = word + " "
+                else:
+                    current_line = test
+            lines.append(current_line)
+            
+            for line in lines:
+                if y_off > cy - 20 and y_off < cy + ch - 30:
+                    screen.blit(FONT_CHAT.render(line, True, color), (cx + 10, y_off))
+                y_off += 22
+        
+        inp_y = cy + ch - 30
+        pygame.draw.rect(screen, CHAT_INPUT_BG, (cx + 10, inp_y, cw - 70, 30))
+        pygame.draw.rect(screen, (150, 150, 200) if chat_active else (100, 100, 150), (cx + 10, inp_y, cw - 70, 30), 2)
+        screen.blit(FONT_CHAT.render(chat_input + ("|" if chat_active else ""), True, WHITE), (cx + 20, inp_y + 5))
+        
+        send_btn = pygame.Rect(cx + cw - 55, inp_y, 40, 30)
+        pygame.draw.rect(screen, DARK_GREEN, send_btn)
+        pygame.draw.rect(screen, (100, 200, 100), send_btn, 2)
+        screen.blit(FONT_CHAT.render(">", True, WHITE), (send_btn.x + 12, send_btn.y + 5))
+        
+        return back_btn, send_btn, agent_x, agent_y
     
-    inp_y = cy + ch - 30
-    pygame.draw.rect(screen, CHAT_INPUT_BG, (cx + 10, inp_y, cw - 70, 30))
-    pygame.draw.rect(screen, (150, 150, 200) if chat_active else (100, 100, 150), (cx + 10, inp_y, cw - 70, 30), 2)
-    screen.blit(FONT_CHAT.render(chat_input + ("|" if chat_active else ""), True, WHITE), (cx + 20, inp_y + 5))
-    
-    send_btn = pygame.Rect(cx + cw - 55, inp_y, 40, 30)
-    pygame.draw.rect(screen, DARK_GREEN, send_btn)
-    pygame.draw.rect(screen, (100, 200, 100), send_btn, 2)
-    screen.blit(FONT_CHAT.render(">", True, WHITE), (send_btn.x + 12, send_btn.y + 5))
-    
-    return back_btn, send_btn
+    return back_btn, None, agent_x, agent_y
 
 def draw_create_dialog(screen, available_floors, selected_idx, input_text, input_active, dialog_scroll):
     s = pygame.Surface((SCREEN_W, SCREEN_H), pygame.SRCALPHA)
@@ -408,6 +418,7 @@ def main():
     
     sala_open = False
     sala_atual = 0
+    sala_chat_open = False
     chat_messages_room = []
     chat_input_room = ""
     chat_active_room = False
@@ -457,12 +468,15 @@ def main():
                     elif sala_open:
                         if back_btn_room and back_btn_room.collidepoint(mouse_pos):
                             sala_open = False
-                        if chat_send_btn_room and chat_send_btn_room.collidepoint(mouse_pos):
+                            sala_chat_open = False
+                        if chat_send_btn_room and chat_send_btn_room.collidepoint(mouse_pos) and sala_chat_open:
                             if chat_input_room.strip():
                                 chat_messages_room.append({"role": "user", "content": chat_input_room})
                                 chat_input_room = ""
-                                # Envia para IA
-                                ctx_msg = [{"role": "system", "content": f"Voce eh o agente do projeto '{new_floor.get('nome', 'Projeto')}' no predio LOKI em Aveiro. Ajude o visitante."}] + chat_messages_room[-5:]
+                                floor_name = f"Andar {sala_atual + 1}"
+                                if sala_atual < len(building_floors) and isinstance(building_floors[sala_atual], dict):
+                                    floor_name = building_floors[sala_atual].get("nome", floor_name)
+                                ctx_msg = [{"role": "system", "content": f"Voce eh o agente do projeto '{floor_name}' no predio LOKI em Aveiro. Ajude o visitante."}] + chat_messages_room[-5:]
                                 thread = threading.Thread(target=lambda c=ctx_msg, m=chat_messages_room, b=list(building_floors): chat_async(c, m, b))
                                 thread.daemon = True
                                 thread.start()
@@ -486,6 +500,7 @@ def main():
                             if building_rect.collidepoint(mouse_pos) and building_floors:
                                 sala_atual = len(building_floors) - 1
                                 sala_open = True
+                                sala_chat_open = False
                                 chat_messages_room = []
                                 chat_input_room = ""
                                 chat_active_room = True
@@ -521,7 +536,7 @@ def main():
                     if event.key == pygame.K_BACKSPACE:
                         chat_input_room = chat_input_room[:-1]
                     elif event.key == pygame.K_RETURN:
-                        if chat_input_room.strip():
+                        if chat_input_room.strip() and sala_chat_open:
                             chat_messages_room.append({"role": "user", "content": chat_input_room})
                             chat_input_room = ""
                             # Envia para IA
@@ -533,8 +548,11 @@ def main():
                             thread.daemon = True
                             thread.start()
                     elif event.key == pygame.K_ESCAPE:
-                        sala_open = False
-                    elif event.unicode and event.key < 256 and chat_active_room:
+                        if sala_chat_open:
+                            sala_chat_open = False
+                        else:
+                            sala_open = False
+                    elif event.unicode and event.key < 256 and chat_active_room and sala_chat_open:
                         chat_input_room += event.unicode
                 elif chat_open:
                     if event.key == pygame.K_BACKSPACE:
@@ -700,7 +718,14 @@ def main():
         
         # Room view
         if sala_open:
-            back_btn_room, chat_send_btn_room = draw_room(screen, sala_atual, building_floors, chat_messages_room, chat_input_room, chat_active_room, chat_scroll_room)
+            back_btn_room, chat_send_btn_room, agent_x, agent_y = draw_room(screen, sala_atual, building_floors, chat_messages_room, chat_input_room, chat_active_room, chat_scroll_room, sala_chat_open)
+        
+        # Click on agent to open chat
+        if sala_open and clicked and not sala_chat_open:
+            agent_rect = pygame.Rect(agent_x - 40, agent_y - 50, 80, 100)
+            if agent_rect and agent_rect.collidepoint(mouse_pos):
+                sala_chat_open = True
+                chat_active_room = True
         
         pygame.display.flip()
         clock.tick(FPS)
